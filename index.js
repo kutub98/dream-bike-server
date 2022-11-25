@@ -16,8 +16,10 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 // allTypesCollections
-const allUsers = client.db("YDBIKE").collection('AllUsers')
 const allCategories = client.db("YDBIKE").collection('BikeCategories')
+const allUsers = client.db("YDBIKE").collection('AllUsers')
+const bikeCollection = client.db("YDBIKE").collection('AllBikes')
+
 
 
 async function  run(){
@@ -38,7 +40,7 @@ app.post('/allUser', async(req, res)=>{
     console.log(saveUser)
     res.send(saveUser)
 })
-
+// providig accessToken  
 app.put("/users/:email", async (req, res) => {
     const email = req.params.email;
     const user = req.body;
