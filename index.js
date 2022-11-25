@@ -41,25 +41,6 @@ app.post('/allUser', async(req, res)=>{
 
 
 
-app.put("/users/:email", async (req, res) => {
-    const email = req.params.email;
-    const user = req.body;
-    console.log(user)
-    const userInp = await allUsers.insertOne(user);
-    const filter = { email: email };
-    const options = { upsert: true };
-    const updateDoc = {
-      $set: user,
-    };
-    const result = await allUsers.updateOne(filter, updateDoc, options);
-    console.log(result);
-    const token = jwt.sign({email}, process.env.bikerToken, {
-      expiresIn: "500h",
-    });
-    res.send({userInp, result, token});
-  });
-
-
 
 
 
