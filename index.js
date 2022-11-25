@@ -70,7 +70,14 @@ app.get('/allCategories', async(req, res)=>{
     const result = await bikeCollection.find(query).toArray()
     res.send(result)
 })
-
+// getAllBikesCollectionServiceByID
+app.get("/allCategories/:serviceId", async (req, res) => {
+    const id = req.params.serviceId;
+    const query = {serviceId : id}
+    const selectedCategory = await  bikeCollection.find(query).toArray()
+    console.log(selectedCategory)
+    res.send(selectedCategory);
+  });
 
 
 
