@@ -13,9 +13,11 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.YDBIKE_NAME}:${process.env.YDBIKE_KEY}@cluster0.mlxcjcs.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-const allUsers = client.db("YDBIKE").collection('AllUsers')
-// allTypesCollections
 
+
+// allTypesCollections
+const allUsers = client.db("YDBIKE").collection('AllUsers')
+const allCategories = client.db("YDBIKE").collection('BikeCategories')
 
 
 async function  run(){
@@ -30,8 +32,6 @@ async function  run(){
 
 
 // allUser details 
-
-
 app.post('/allUser', async(req, res)=>{
     const user = req.body;
     const saveUser = await allUsers.insertOne(user)
@@ -58,13 +58,23 @@ app.put("/users/:email", async (req, res) => {
   });
 
 
+// getAllCategories
+app.get('/allCategories', async(req, res)=>{
+    const  query ={};
+     const result = await allCategories.find(query).toArray()
+     res.send(result)
+ })
+// getAllBikesCollection
+ app.get('/allBikes', async(req, res)=>{
+    const query = {}
+    const result = await bikeCollection.find(query).toArray()
+    res.send(result)
+})
 
 
-// app.get("/AllBikes/:id", async (req, res) => {
-//     const id = req.params.id;
-//     const selectedBike = await AllBikes.find(n => n._id === id);
-//     res.send(selectedBike);
-//});
+
+
+
 
 run().catch(error => console.error(error))
 
