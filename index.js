@@ -19,6 +19,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const allCategories = client.db("YDBIKE").collection('BikeCategories')
 const allUsers = client.db("YDBIKE").collection('AllUsers')
 const bikeCollection = client.db("YDBIKE").collection('AllBikes')
+const bookedCollection = client.db("YDBIKE").collection('orderedByBooking')
 
 
 
@@ -37,7 +38,7 @@ async function  run(){
 app.post('/allUser', async(req, res)=>{
     const user = req.body;
     const saveUser = await allUsers.insertOne(user)
-    console.log(saveUser)
+    // console.log(saveUser)
     res.send(saveUser)
 })
 // providig accessToken  
@@ -52,7 +53,7 @@ app.put("/users/:email", async (req, res) => {
       $set: user,
     };
     const result = await allUsers.updateOne(filter, updateDoc, options);
-    console.log(result);
+    // console.log(result);
     const token = jwt.sign({email}, process.env.bikerToken, {
       expiresIn: "500h",
     });
@@ -76,13 +77,26 @@ app.get('/allCategories', async(req, res)=>{
 app.get("/allCategories/:serviceId", async (req, res) => {
     const id = req.params.serviceId;
     const query = {serviceId : id}
-    const selectedCategory = await  bikeCollection.find(query).toArray()
-    console.log(selectedCategory)
-    res.send(selectedCategory);
-  });
+    const serviceCategory = await  bikeCollection.find(query).toArray()
+    // console.log(serviceCategory)
+    res.send(serviceCategory);
+});
+app.get("/productId/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = {_id: ObjectId(id)}
+    const productId = await  bikeCollection.find(query).toArray()
+    // console.log(productId,"productID")
+    res.send(productId);
+});
 
+// gettingOrderByBooking
 
-
+app.post('/booked', async(req, res)=>{
+    const query = req.body;
+    const receivedOrderByBooking = await bookedCollection.insertOne(query)
+    console.log(receivedOrderByBooking)
+    res.send(receivedOrderByBooking)
+})
 
 
 run().catch(error => console.error(error))
