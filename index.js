@@ -10,6 +10,7 @@ app.use(cors())
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { query } = require("express");
 const uri = `mongodb+srv://${process.env.YDBIKE_NAME}:${process.env.YDBIKE_KEY}@cluster0.mlxcjcs.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -40,6 +41,14 @@ app.post('/allUser', async(req, res)=>{
     const saveUser = await allUsers.insertOne(user)
     // console.log(saveUser)
     res.send(saveUser)
+})
+
+
+app.get('/allUser', async(req, res)=>{
+    const email= {}
+    const allUser = await allUsers.find(email).toArray();
+    console.log(allUser)
+    res.send(allUser)
 })
 // providig accessToken  
 app.put("/users/:email", async (req, res) => {
@@ -96,6 +105,17 @@ app.post('/booked', async(req, res)=>{
     const receivedOrderByBooking = await bookedCollection.insertOne(query)
     console.log(receivedOrderByBooking)
     res.send(receivedOrderByBooking)
+})
+
+// fine total order by per user
+
+
+app.get('/ordered/:email', async(req, res)=>{
+    const id = req.params.email;
+    const query = {customerEmail: id};
+    const receivedAllOrder = await bookedCollection.find(query).toArray()
+    console.log(receivedAllOrder)
+    res.send(receivedAllOrder)
 })
 
 
