@@ -47,27 +47,43 @@ app.post('/allUser', async(req, res)=>{
 app.get('/allUser', async(req, res)=>{
     const email= {}
     const allUser = await allUsers.find(email).toArray();
-    console.log(allUser)
+    // console.log(allUser)
     res.send(allUser)
 })
-// providig accessToken  
-app.put("/users/:email", async (req, res) => {
-    const email = req.params.email;
-    const user = req.body;
-    console.log(user)
-    const userInp = await allUsers.insertOne(user);
-    const filter = { email: email };
-    const options = { upsert: true };
-    const updateDoc = {
-      $set: user,
-    };
-    const result = await allUsers.updateOne(filter, updateDoc, options);
-    // console.log(result);
-    const token = jwt.sign({email}, process.env.bikerToken, {
-      expiresIn: "500h",
-    });
-    res.send({userInp, result, token});
+
+app.get("/allUsers/:userRole", async (req, res) => {
+    const user = req.params.userRole;
+    const query = { userRole:  user};
+    const result = await allUsers.find(query).toArray();
+    res.send(result);
   });
+
+
+//   app.put("/allUser/userRole/:id", async (req, res) => {
+   
+//     const id = req.params.id;
+//     const filter = { _id: ObjectId(id) };
+//     const option = { upsert: true };
+//     const updateDoc = {
+//       $set: {
+//         role: "admin",
+//       },
+//     };
+//     const result = await allUsers.updateOne(filter, updateDoc, option);
+//     res.send(result);
+//   });
+
+//   app.get("/allUser/admin/:email", async (req, res) => {
+//     const email = req.params.email;
+//     const query = { email };
+//     const user = await allUsers.findOne(query);
+//     res.send({ isAdmin: user?.role === "admin" });
+//   });
+
+
+
+
+
 
 
 // getAllCategories
@@ -82,10 +98,16 @@ app.get('/allCategories', async(req, res)=>{
     const result = await bikeCollection.find(query).toArray()
     res.send(result)
 })
+// posting a product
+ app.post('/allBikes', async(req, res)=>{
+    const query = req.body;
+    const result = await bikeCollection.insertOne(query)
+    res.send(result)
+})
 // getAllBikesCollectionServiceByID
-app.get("/allCategories/:serviceId", async (req, res) => {
-    const id = req.params.serviceId;
-    const query = {serviceId : id}
+app.get("/allCategories/:CategoryName", async (req, res) => {
+    const id = req.params.CategoryName;
+    const query = {CategoryName : id}
     const serviceCategory = await  bikeCollection.find(query).toArray()
     // console.log(serviceCategory)
     res.send(serviceCategory);
@@ -98,12 +120,20 @@ app.get("/productId/:id", async (req, res) => {
     res.send(productId);
 });
 
+app.get("/myProduct/:email", async (req, res) => {
+    const email = req.params.email;
+    const query = {email: email}
+    const myProduct = await  bikeCollection.find(query).toArray()
+    console.log(myProduct,"productID")
+    res.send(myProduct);
+});
+
 // gettingOrderByBooking
 
 app.post('/booked', async(req, res)=>{
     const query = req.body;
     const receivedOrderByBooking = await bookedCollection.insertOne(query)
-    console.log(receivedOrderByBooking)
+    // console.log(receivedOrderByBooking)
     res.send(receivedOrderByBooking)
 })
 
@@ -114,7 +144,7 @@ app.get('/ordered/:email', async(req, res)=>{
     const id = req.params.email;
     const query = {customerEmail: id};
     const receivedAllOrder = await bookedCollection.find(query).toArray()
-    console.log(receivedAllOrder)
+    // console.log(receivedAllOrder)
     res.send(receivedAllOrder)
 })
 
