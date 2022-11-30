@@ -48,7 +48,7 @@ app.get("/jwt", async (req, res) => {
 });
 
 function verifyJwt(req, res, next) {
-  // console.log("verify inside", req.headers.authorization);
+  
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -142,9 +142,9 @@ app.get("/allUser/:email", async (req, res) => {
   res.send(result);
 });
 
-app.delete("/allUser/:id", verifyJwt, async (req, res) => {
-  const id = req.params.email;
-  const query = { email: id };
+app.delete("/allUser/:email", verifyJwt, async (req, res) => {
+  const email = req.params.email;
+  const query = { email: email };
   const result = await allUser.deleteOne(query);
   console.log(result);
   res.send(result);
@@ -234,6 +234,14 @@ app.get("/myProduct/:email", async (req, res) => {
   res.send(myProduct);
 });
 
+app.delete("/myProduct/:id", verifyJwt, async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: ObjectId(id) };
+  const result = await bikeCollection.deleteOne(query);
+  console.log(result);
+  res.send(result);
+});
+
 // gettingOrderByBooking
 
 app.post("/booked", async (req, res) => {
@@ -271,6 +279,12 @@ app.post('/ReportItem', async(req, res)=>{
   const posting = await reportItemList.insertOne(request);
   console.log(posting)
   res.send(posting)
+})
+app.get('/ReportItem', async(req, res)=>{
+  const query = {};
+  const result = await reportItemList.find(query).toArray();
+  console.log(result)
+  res.send(result)
 })
 
 run().catch((error) => console.error(error));
