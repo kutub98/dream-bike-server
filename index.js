@@ -19,7 +19,7 @@ const client = new MongoClient(uri, {
 
 // allTypesCollections
 const allCategories = client.db("YDBIKE").collection("BikeCategories");
-const allUsers = client.db("YDBIKE").collection("AllUsers");
+const allUser = client.db("YDBIKE").collection("AllUser");
 const bikeCollection = client.db("YDBIKE").collection("AllBikes");
 const bookedCollection = client.db("YDBIKE").collection("orderedByBooking");
 
@@ -32,45 +32,123 @@ async function run() {
   }
 }
 
+app.get("/jwt", async (req, res) => {
+  const email = req.query.email;
+  const query = { email: email };
+  const UserToken = await allUser.findOne(query);
+  console.log(email, UserToken);
+  if (UserToken) {
+    const token = jwt.sign({ email }, process.env.bikerToken, { expiresIn: "776h" });
+    return res.send({ bikerToken: token });
+  } else {
+    res.status(403).send({ bikerToken: " " });
+  }
+});
+
+function verifyJwt(req, res, next) {
+  // console.log("verify inside", req.headers.authorization);
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).send("Unauthorized Access");
+  }
+  const token = authHeader.split(' ')[1];
+  console.log(authHeader, token);
+  jwt.verify(token, process.env.bikerToken, function (err, decoded) {
+    if (err) {
+      console.log(err);
+      return res.status(403).send({ message: "forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
+// VerifyAdmin
+const verifyAdmin = async (req, res, next) => {
+  const decodedEmail = req.decoded.email;
+  const query = { email: decodedEmail };
+  const user = await allUser.findOne(query);
+
+  if (user?.role !== "admin") {
+    return res.status(403).send({ message: "You're not author" });
+  }
+  next();
+};
+// VerifySeller
+const verifySeller = async (req, res, next) => {
+  const decodedEmail = req.decoded.email;
+  const query = { email: decodedEmail };
+  const user = await allUser.findOne(query);
+
+  if (user?.role !== "seller") {
+    return res.status(403).send({ message: "You're not author" });
+  }
+  next();
+};
+
 // allUser details
 app.post("/allUser", async (req, res) => {
   const user = req.body;
-  const saveUser = await allUsers.insertOne(user);
+  const saveUser = await allUser.insertOne(user);
   // console.log(saveUser)
   res.send(saveUser);
 });
 
 app.get("/allUser", async (req, res) => {
-  const email = {};
-  const allUser = await allUsers.find(email).toArray();
+  const query = {};
+  const allUsers = await allUser.find(query).toArray();
   // console.log(allUser)
-  res.send(allUser);
+  res.send(allUsers);
 });
 
-app.get("/allUser/:userRole", async (req, res) => {
-  const user = req.params.userRole;
-  const query = { userRole: user };
-  const result = await allUsers.find(query).toArray();
+app.get("/allUser/:role", async (req, res) => {
+  const user = req.params.role;
+  const query = { role: user };
+  const result = await allUser.find({}).toArray();
   res.send(result);
 });
+
+// getting Seller
+app.get("/seller/:Seller", async (req, res) => {
+  const user = req.params.Seller;
+  const query = { role: user };
+  // console.log(query)
+  const result = await allUser.find(query).toArray();
+//  console.log(result)
+ res.send(result)
+
+});
+// getting buyers
+app.get("/buyer/:Buyer", async (req, res) => {
+  const user = req.params.Buyer;
+  const query = { role: user };
+  // console.log(query)
+  const result = await allUser.find(query).toArray();
+ console.log(result)
+ res.send(result)
+
+});
+
+
+
 
 app.get("/allUser/:email", async (req, res) => {
   const user = req.params.email;
   const query = { email: user };
-  const result = await allUsers.findOne(query).toArray();
+  const result = await allUser.findOne(query).toArray();
   res.send(result);
 });
 
-app.delete('/allUser/:id', async(req, res)=> {
-     const id = req.params.email;
-     const query = {email : id};
-     const result = await allUsers.deleteOne(query)
-     console.log(result)
-     res.send(result)
-    
-})
+app.delete("/allUser/:id", verifyJwt, async (req, res) => {
+  const id = req.params.email;
+  const query = { email: id };
+  const result = await allUser.deleteOne(query);
+  console.log(result);
+  res.send(result);
+});
 
-//   app.put("/allUser/userRole/:id", async (req, res) => {
+//   app.put("/allUser/role/:id", async (req, res) => {
 
 //     const id = req.params.id;
 //     const filter = { _id: ObjectId(id) };
@@ -80,16 +158,37 @@ app.delete('/allUser/:id', async(req, res)=> {
 //         role: "admin",
 //       },
 //     };
-//     const result = await allUsers.updateOne(filter, updateDoc, option);
+//     const result = await allUser.updateOne(filter, updateDoc, option);
 //     res.send(result);
 //   });
 
-//   app.get("/allUser/admin/:email", async (req, res) => {
-//     const email = req.params.email;
-//     const query = { email };
-//     const user = await allUsers.findOne(query);
-//     res.send({ isAdmin: user?.role === "admin" });
-//   });
+// app.put('/AllUser/Seller/:id', verifySeller, async (req, res) => {
+//   const id = req.params.id;
+//   const filter = { _id: ObjectId(id) }
+//   const options = { upsert: true };
+//   const updatedDoc = {
+//       $set: {
+//           role: 'admin'
+//       }
+//   }
+//   const result = await allUser.updateOne(filter, updatedDoc, options);
+//   res.send(result);
+// });
+
+// seller email
+app.get("/allUser/seller/:email", async (req, res) => {
+  const email = req.params.email;
+  const query = { email };
+  const user = await allUser.findOne(query);
+  res.send({ isSeller: user?.role === "Seller" });
+});
+// admin email
+app.get("/allUser/admin/:email", async (req, res) => {
+  const email = req.params.email;
+  const query = { email };
+  const user = await allUser.findOne(query);
+  res.send({ isAdmin: user?.role === "admin" });
+});
 
 // getAllCategories
 app.get("/allCategories", async (req, res) => {
@@ -129,7 +228,7 @@ app.get("/myProduct/:email", async (req, res) => {
   const email = req.params.email;
   const query = { email: email };
   const myProduct = await bikeCollection.find(query).toArray();
-  console.log(myProduct, "productID");
+  // console.log(myProduct, "productID");
   res.send(myProduct);
 });
 
