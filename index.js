@@ -22,6 +22,8 @@ const allCategories = client.db("YDBIKE").collection("BikeCategories");
 const allUser = client.db("YDBIKE").collection("AllUser");
 const bikeCollection = client.db("YDBIKE").collection("AllBikes");
 const bookedCollection = client.db("YDBIKE").collection("orderedByBooking");
+const wishListCollection = client.db("YDBIKE").collection("WishListItem");
+const reportItemList = client.db("YDBIKE").collection("reportItemList");
 
 async function run() {
   try {
@@ -250,6 +252,26 @@ app.get("/ordered/:email", async (req, res) => {
   // console.log(receivedAllOrder)
   res.send(receivedAllOrder);
 });
+
+
+
+
+// wishtListItem 
+
+app.post('/wishListItem', async(req, res)=>{
+  const request = req.body;
+  const posting = await wishListCollection.insertOne(request);
+  console.log(posting)
+  res.send(posting)
+})
+
+//report Item
+app.post('/ReportItem', async(req, res)=>{
+  const request = req.body;
+  const posting = await reportItemList.insertOne(request);
+  console.log(posting)
+  res.send(posting)
+})
 
 run().catch((error) => console.error(error));
 
